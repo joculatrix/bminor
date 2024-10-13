@@ -1,0 +1,16 @@
+/* from chapter 7, expected output: 10 hello false */
+
+x: integer = 10;
+
+f: function void ( x: string ) = {
+    print x, "\n";
+    {
+        x: boolean = false;
+        print x, "\n";
+    }
+}
+
+main: function void () = {
+    print x, "\n";
+    f("hello");
+}

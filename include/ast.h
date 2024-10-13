@@ -50,6 +50,7 @@ struct decl* decl_function(
     struct stmt* code,
     struct decl* next
 );
+/* for displaying the AST: */
 void print_decl(struct decl* decl, int tab_level);
 
 #define X_STMT_T \
@@ -149,6 +150,7 @@ struct stmt* stmt_for(
 struct stmt* stmt_print(struct expr* expr, struct stmt* next);
 struct stmt* stmt_return(struct expr* expr, struct stmt* next);
 struct stmt* stmt_block(struct stmt* body, struct stmt* next);
+/* for displaying the AST: */
 void print_stmt(struct stmt* stmt, int tab_level);
 
 #define X_EXPR_T \
@@ -218,6 +220,7 @@ struct expr* expr_int_lit(int value);
 struct expr* expr_bool_lit(bool value);
 struct expr* expr_char_lit(char value);
 struct expr* expr_str_lit(const char* value);
+/* for displaying the AST: */
 void print_expr(struct expr* expr, int tab_level);
 
 typedef enum {
@@ -242,6 +245,7 @@ struct type* type_create(type_t kind, struct type* subtype, struct param_list* p
 struct type* type_data(type_t kind);
 struct type* type_array(struct type* subtype);
 struct type* type_function(struct type* subtype, struct param_list* params);
+/* for displaying the AST: */
 void print_type(struct type* type, int tab_level);
 
 struct param_list {
@@ -251,6 +255,7 @@ struct param_list {
 };
 
 struct param_list* param_list(char* name, struct type* type, struct param_list* params);
+/* for displaying the AST: */
 void print_param_list(struct param_list*, int tab_level);
 
 #endif
