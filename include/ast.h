@@ -1,6 +1,7 @@
 #ifndef AST_H
 #define AST_H
 
+#include "symbol.h"
 #include <stdbool.h>
 
 #define MAX_INDENT 10
@@ -28,6 +29,8 @@ struct decl {
     /* In the top-level list of declarations that makes up the program, this
      * points to the next declaration in the list, if this isn't the last one. */
     struct decl* next;
+    /* Points to the symbol initialized by this declaration. */
+    struct symbol* symbol;
 };
 
 struct decl* decl_create(
@@ -176,7 +179,6 @@ void print_stmt(struct stmt* stmt, int tab_level);
     X(EXPR_IDENT, "ID") \
     X(EXPR_INDEX, "INDEX") \
     X(EXPR_FUN_CALL, "CALL") \
-    X(EXPR_FUN_ARG, "ARG") \
     X(EXPR_BOOL_LIT, "BOOL_LIT") \
     X(EXPR_CHAR_LIT, "CHAR_LIT") \
     X(EXPR_INT_LIT, "INT_LIT") \
@@ -201,6 +203,8 @@ struct expr {
     char* name;
     int value;
     const char* str_value;
+    /* Points to the symbol represented by this expression, if EXPR_IDENT. */
+    struct symbol* symbol;
 };
 
 /* Function to create an expr. Not recommended to call this function directly.
@@ -223,15 +227,26 @@ struct expr* expr_str_lit(const char* value);
 /* for displaying the AST: */
 void print_expr(struct expr* expr, int tab_level);
 
+#define X_TYPE_T \
+    X(TYPE_VOID, "void") \
+    X(TYPE_BOOLEAN, "boolean") \
+    X(TYPE_CHARACTER, "char") \
+    X(TYPE_INTEGER, "integer") \
+    X(TYPE_STRING, "string") \
+    X(TYPE_ARRAY, "array []") \
+    X(TYPE_FUNCTION, "function ()")
+
 typedef enum {
-    TYPE_VOID,
-    TYPE_BOOLEAN,
-    TYPE_CHARACTER,
-    TYPE_INTEGER,
-    TYPE_STRING,
-    TYPE_ARRAY,
-    TYPE_FUNCTION
+    #define X(a, b)     a,
+        X_TYPE_T
+    #undef X
 } type_t;
+
+static char* type_t_str[] = {
+    #define X(a, b)     b,
+        X_TYPE_T
+    #undef X
+};
 
 struct type {
     type_t kind;
@@ -252,6 +267,7 @@ struct param_list {
     char* name;
     struct type* type;
     struct param_list* next;
+    struct symbol* symbol;
 };
 
 struct param_list* param_list(char* name, struct type* type, struct param_list* params);
