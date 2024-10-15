@@ -8,7 +8,7 @@
  * Obviously this type should change if reused for another application. */
 typedef struct {
     ht* table;
-    list_node* next;
+    struct list_node* next;
 } list_node;
 
 typedef struct {

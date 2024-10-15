@@ -3,14 +3,17 @@
 x: integer = 10;
 
 f: function void ( x: string ) = {
-    print x, "\n";
+    print x;
+    print "\n";
     {
         x: boolean = false;
-        print x, "\n";
+        print x;
+        print "\n";
     }
 }
 
 main: function void () = {
-    print x, "\n";
+    print x;
+    print "\n";
     f("hello");
 }

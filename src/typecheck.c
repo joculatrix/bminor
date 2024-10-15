@@ -57,7 +57,7 @@ void type_delete(struct type* t) {
         param_list_delete(t->params);
     }
     if (t->subtype) {
-        type_delte(t->subtype);
+        type_delete(t->subtype);
     }
     free(t);
 }
@@ -72,6 +72,8 @@ void param_list_delete(struct param_list* p) {
 }
 
 void decl_typecheck(struct decl* d) {
+    if (!d) return;
+
     if (d->value) {
         struct type* t = expr_typecheck(d->value);
         if (!type_equals(t, d->symbol->type)) {
@@ -108,6 +110,8 @@ void decl_typecheck(struct decl* d) {
         type_delete(t);
         returned = false;
     }
+
+    decl_typecheck(d->next);
 }
 
 void stmt_typecheck(struct stmt* s) {
@@ -367,10 +371,8 @@ struct type* expr_typecheck(struct expr* e) {
             result = type_copy(left);
             break;
         case EXPR_FUN_CALL:
-            struct symbol* symbol = scope_lookup(e->left->name);
-
             struct expr* arg_p = e->right;
-            struct param_list* param_p = symbol->type->params;
+            struct param_list* param_p = e->symbol->type->params;
 
             while (arg_p != 0 && param_p != 0) {
                 struct type* arg_type = expr_typecheck(arg_p);
@@ -398,7 +400,7 @@ struct type* expr_typecheck(struct expr* e) {
                 );
             }
 
-            result = type_copy(symbol->type->subtype);
+            result = type_copy(e->symbol->type->subtype);
             break;
     }
 

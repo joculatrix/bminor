@@ -5,25 +5,28 @@ BUILD	= build
 INCLUDE	= -Iinclude/
 OBJ_DIR = $(BUILD)/objects
 SRC		= src
-AST		= src/ast/decl.c src/ast/expr.c src/ast/param_list.c \
-		  src/ast/stmt.c src/ast/type.c
+LEXER	= $(SRC)/lex.yy.c
+PARSER	= $(SRC)/parser.yy.c
+AST		= $(SRC)/ast/decl.c $(SRC)/ast/expr.c $(SRC)/ast/param_list.c \
+		  $(SRC)/ast/stmt.c $(SRC)/ast/type.c
+SEMANTIC= $(SRC)/hash.c $(SRC)/symbol.c $(SRC)/typecheck.c
 
 BISONFLAGS = --header=include/yy.h
 
-lex.yy.c: $(SRC)/scanner.flex
-	flex -o $(SRC)/lex.yy.c $(SRC)/scanner.flex
+lexer: $(SRC)/scanner.flex
+	flex -o $(LEXER) $(SRC)/scanner.flex
 
-parser.yy.c: $(SRC)/parser.y
-	bison $(BISONFLAGS) --output=$(SRC)/parser.yy.c $(SRC)/parser.y
+parser: $(SRC)/parser.y
+	bison $(BISONFLAGS) --output=$(PARSER) $(SRC)/parser.y
 
-parser: $(SRC)/main.c parser.yy.c lex.yy.c
-	$(CC) -o parser $(CFLAGS) $(INCLUDE) $(SRC)/main.c $(SRC)/lex.yy.c \
-		$(SRC)/parser.yy.c $(AST)
+bmcc: lexer parser
+	$(CC) $(CFLAGS) -o bmcc $(INCLUDE) $(SRC)/main.c $(LEXER) $(PARSER) \
+		$(AST) $(SEMANTIC)
 
 .PHONY: debug debug-parser
 
 debug: CFLAGS += -g
-debug: parser
+debug: bmcc
 
 debug-parser: BISONFLAGS += -v -Wcounterexamples
 debug-parser: parser.yy.c

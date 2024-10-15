@@ -1,4 +1,8 @@
 build
+
 src/lex.yy.c
 src/parser.yy.c
+
+bmcc
+
 .vscode
