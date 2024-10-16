@@ -104,7 +104,8 @@ typedef enum {
  #undef X
 } stmt_t;
 
-static char* stmt_t_str[] = {
+/* not actually unused, but marking as such to make gcc quieter: */
+__attribute__((unused)) static char* stmt_t_str[] = {
  #define X(a, b)    b,
     X_STMT_T
  #undef X
@@ -190,7 +191,8 @@ typedef enum {
     #undef X
 } expr_t;
 
-static char *expr_t_str[] = {
+/* not actually unused, but marking as such to make gcc quieter: */
+__attribute__((unused)) static char* expr_t_str[] = {
  #define X(a, b)      b,
     X_EXPR_T
  #undef X
@@ -242,7 +244,8 @@ typedef enum {
     #undef X
 } type_t;
 
-static char* type_t_str[] = {
+/* not actually unused, but marking as such to make gcc quieter: */
+__attribute__((unused)) static char* type_t_str[] = {
     #define X(a, b)     b,
         X_TYPE_T
     #undef X

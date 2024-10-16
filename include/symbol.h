@@ -12,7 +12,7 @@ typedef enum {
 struct symbol {
     symbol_t kind;
     struct type* type;
-    char* name;
+    const char* name;
     int which;
 };
 

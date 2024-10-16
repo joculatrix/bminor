@@ -1,7 +1,9 @@
-#include "ast.h"
 #include "symbol.h"
+#include "semantics.h"
+
 #include "hash.h"
 #include "stack.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 

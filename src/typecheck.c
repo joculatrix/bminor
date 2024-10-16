@@ -191,13 +191,13 @@ struct type* expr_typecheck(struct expr* e) {
     struct type* result;
 
     switch (e->kind) {
-        case EXPR_AND:
-        case EXPR_OR:
-        case EXPR_EQ:
-        case EXPR_N_EQ:
-        case EXPR_LESS:
-        case EXPR_L_EQ:
-        case EXPR_GREATER:
+        case EXPR_AND:      __attribute__((fallthrough));
+        case EXPR_OR:       __attribute__((fallthrough));
+        case EXPR_EQ:       __attribute__((fallthrough));
+        case EXPR_N_EQ:     __attribute__((fallthrough));
+        case EXPR_LESS:     __attribute__((fallthrough));
+        case EXPR_L_EQ:     __attribute__((fallthrough));
+        case EXPR_GREATER:  __attribute__((fallthrough));
         case EXPR_G_EQ:
             if (left->kind == TYPE_VOID) {
                 fprintf(stderr, "error: cannot compare type `void`\n");
@@ -213,6 +213,7 @@ struct type* expr_typecheck(struct expr* e) {
                     type_t_str[right->kind]
                 );
             }
+            __attribute__((fallthrough));
         case EXPR_BOOL_LIT:
             result = type_create(TYPE_BOOLEAN, 0, 0);
             break;
@@ -224,6 +225,21 @@ struct type* expr_typecheck(struct expr* e) {
                 );
             }
             result = type_create(TYPE_BOOLEAN, 0, 0);
+            break;
+        case EXPR_ARRAY:
+            struct expr* item_p = e->right;
+            while (item_p) {
+                if (expr_typecheck(item_p) != left) {
+                    fprintf(
+                        stderr,
+                        "error: item of type `%s` in array, expected `%s`\n",
+                        type_t_str[item_p->symbol->type->kind],
+                        type_t_str[left->kind]
+                    );
+                }
+                item_p = item_p->right;
+            }
+            result = type_create(TYPE_ARRAY, left, 0);
             break;
         case EXPR_CHAR_LIT:
             result = type_create(TYPE_CHARACTER, 0, 0);
@@ -357,6 +373,17 @@ struct type* expr_typecheck(struct expr* e) {
                     type_t_str[result->kind]
                 );
             }
+            break;
+        case EXPR_EXP:
+            if (left->kind != TYPE_INTEGER || right->kind != TYPE_INTEGER) {
+                fprintf(
+                    stderr,
+                    "error: cannot exponentiate type `%s` by type `%s`\n",
+                    type_t_str[left->kind],
+                    type_t_str[right->kind]
+                );
+            }
+            result = type_copy(left);
             break;
         case EXPR_INC:
             if (left->kind != TYPE_INTEGER) {

@@ -4,13 +4,15 @@
 #include "hash.h"
 #include <stdlib.h>
 
+typedef struct list_node list_node;
+
 /* The list node defined here specifically holds symbol tables.
  * Obviously this type should change if reused for another application. */
-typedef struct {
+struct list_node {
     ht* table;
     /* compiler gets unhappy when this doesn't say struct: */
-    struct list_node* next;
-} list_node;
+    list_node* next;
+};
 
 typedef struct {
     int length;
