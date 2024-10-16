@@ -8,6 +8,7 @@
  * Obviously this type should change if reused for another application. */
 typedef struct {
     ht* table;
+    /* compiler gets unhappy when this doesn't say struct: */
     struct list_node* next;
 } list_node;
 
@@ -60,7 +61,7 @@ ht* pop(stack* s) {
     }
     
     list_node* new_head = NULL;
-    if (s->head->next != NULL) s->head->next;
+    if (s->head->next != NULL) new_head = s->head->next;
 
     ht* table = s->head->table;
     free(s->head);

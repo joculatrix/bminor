@@ -67,12 +67,13 @@ struct symbol* scope_lookup(const char* name) {
     if (symbol_stack == NULL) {
         return NULL;
     }
-    list_node* stack_p = symbol_stack->head;
+    list_node* stack_p = peek(symbol_stack);
     while (stack_p != NULL) {
         void* sym = ht_get(stack_p->table, name);
         if (sym != NULL) {
             return (struct symbol*)sym;
         }
+        stack_p = stack_p->next;
     }
     return NULL;
 }
@@ -136,9 +137,11 @@ void expr_resolve(struct expr* e) {
                 e->name
             );
         }
+        /* in case the IDENT is a function call argument: */
+        expr_resolve(e->right);
     } else if (e->kind == EXPR_FUN_CALL) {
-        e->symbol = scope_lookup(e->name);
-        if (e->symbol == NULL) {
+        e->left->symbol = scope_lookup(e->left->name);
+        if (e->left->symbol == NULL) {
             fprintf(
                 stderr,
                 "error: attempt to call undeclared function `%s` ",
@@ -149,6 +152,7 @@ void expr_resolve(struct expr* e) {
                 "(functions must be defined or prototyped before call)\n"
             );
         }
+        expr_resolve(e->right);
     } else {
         expr_resolve(e->left);
         expr_resolve(e->right);

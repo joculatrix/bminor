@@ -19,6 +19,7 @@ struct type* expr_typecheck(struct expr* e);
 bool type_equals(struct type* a, struct type* b);
 struct type* type_copy(struct type* t);
 void type_delete(struct type* t);
+struct param_list* param_list_copy(struct param_list* p);
 void param_list_delete(struct param_list* p);
 
 #endif

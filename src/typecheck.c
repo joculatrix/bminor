@@ -34,25 +34,33 @@ bool type_equals(struct type* a, struct type* b) {
 }
 
 struct type* type_copy(struct type* t) {
+    if (!t) return NULL;
+
     struct type* copy = malloc(sizeof(*copy));
     copy->kind = t->kind;
     if (t->subtype) {
         copy->subtype = type_copy(t->subtype);
     }
     if (t->params) {
-        struct param_list* p_a = copy->params;
-        struct param_list* p_b = t->params;
-
-        while (p_b != 0) {
-            p_a = param_list(p_b->name, p_b->type, 0);
-            p_a = p_a->next;
-            p_b = p_b->next;
-        }
+        copy->params = param_list_copy(t->params);
     }
     return copy;
 }
 
+struct param_list* param_list_copy(struct param_list* p) {
+    if (!p) return NULL;
+
+    struct param_list* copy = malloc(sizeof(*p));
+    copy->name = p->name;
+    copy->type = type_copy(p->type);
+    copy->next = param_list_copy(p->next);
+
+    return copy;
+}
+
 void type_delete(struct type* t) {
+    if (!t) return;
+
     if (t->params) {
         param_list_delete(t->params);
     }
@@ -89,14 +97,14 @@ void decl_typecheck(struct decl* d) {
     }
     if (d->code) {
         /* make return type of function available for checking */
-        struct type* t = type_copy(curr_return);
+        struct type* t = curr_return == 0 ? 0 : type_copy(curr_return);
         curr_return = type_copy(d->type->subtype);
 
         returned = false;
 
         stmt_typecheck(d->code);
 
-        if (d->type->subtype != TYPE_VOID && !returned) {
+        if (d->type->subtype->kind != TYPE_VOID && !returned) {
             fprintf(
                 stderr,
                 "error: function has no return of type `%s`\n",
@@ -106,7 +114,7 @@ void decl_typecheck(struct decl* d) {
 
         /* revert return state to previous */
         type_delete(curr_return);
-        curr_return = type_copy(t);
+        curr_return = t == 0 ? 0 : type_copy(t);
         type_delete(t);
         returned = false;
     }
@@ -372,9 +380,9 @@ struct type* expr_typecheck(struct expr* e) {
             break;
         case EXPR_FUN_CALL:
             struct expr* arg_p = e->right;
-            struct param_list* param_p = e->symbol->type->params;
+            struct param_list* param_p = left->params;
 
-            while (arg_p != 0 && param_p != 0) {
+            while (arg_p && param_p) {
                 struct type* arg_type = expr_typecheck(arg_p);
                 if (!type_equals(arg_type, param_p->type)) {
                     fprintf(
@@ -388,19 +396,19 @@ struct type* expr_typecheck(struct expr* e) {
                 param_p = param_p->next;
                 type_delete(arg_type);
             }
-            if (arg_p != 0) {
+            if (arg_p) {
                 fprintf(
                     stderr,
                     "error: too many arguments\n"
                 );
-            } else if (param_p != 0) {
+            } else if (param_p) {
                 fprintf(
                     stderr,
                     "error: not enough arguments\n"
                 );
             }
 
-            result = type_copy(e->symbol->type->subtype);
+            result = type_copy(left->subtype);
             break;
     }
 
