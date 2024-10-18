@@ -3,13 +3,13 @@
 
 extern FILE *yyin;
 extern int yyparse();
-extern struct decl* parser_result;
+extern decl* parser_result;
 
 extern void scope_enter();
 extern void scope_exit();
-extern void decl_resolve(struct decl* d);
+extern void decl_resolve(decl* d);
 
-extern void decl_typecheck(struct decl* d);
+extern void decl_typecheck(decl* d);
 
 enum {ARG_NAME,ARG_FILE,ARG_NARGS};
 

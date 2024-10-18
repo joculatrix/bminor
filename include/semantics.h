@@ -5,21 +5,21 @@
 
 /* name resolution -- in `symbol.c` */
 
-void decl_resolve(struct decl* d);
-void expr_resolve(struct expr* e);
-void stmt_resolve(struct stmt* s);
-void param_list_resolve(struct param_list* p);
+void decl_resolve(decl* d);
+void expr_resolve(expr* e);
+void stmt_resolve(stmt* s);
+void param_list_resolve(param_list* p);
 
 /* type checking -- in `typecheck.c` */
 
-void decl_typecheck(struct decl* d);
-void stmt_typecheck(struct stmt* s);
-struct type* expr_typecheck(struct expr* e);
+void decl_typecheck(decl* d);
+void stmt_typecheck(stmt* s);
+type* expr_typecheck(expr* e);
 
-bool type_equals(struct type* a, struct type* b);
-struct type* type_copy(struct type* t);
-void type_delete(struct type* t);
-struct param_list* param_list_copy(struct param_list* p);
-void param_list_delete(struct param_list* p);
+bool type_equals(type* a, type* b);
+type* type_copy(type* t);
+void type_delete(type* t);
+param_list* param_list_copy(param_list* p);
+void param_list_delete(param_list* p);
 
 #endif

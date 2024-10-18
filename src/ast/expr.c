@@ -2,15 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct expr* expr_create(
+expr* expr_create(
     expr_t kind,
-    struct expr* left,
-    struct expr* right,
+    expr* left,
+    expr* right,
     char* name,
     int value,
     const char* str_value
 ) {
-    struct expr* e = malloc(sizeof(*e));
+    expr* e = malloc(sizeof(*e));
     e->kind = kind;
     e->left = left;
     e->right = right;
@@ -20,35 +20,35 @@ struct expr* expr_create(
     return e;
 }
 
-struct expr* expr_ident(char* name) {
+expr* expr_ident(char* name) {
     return expr_create(EXPR_IDENT, 0, 0, name, 0, 0);
 }
 
-struct expr* expr_binary(expr_t kind, struct expr* left, struct expr* right) {
+expr* expr_binary(expr_t kind, expr* left, expr* right) {
     return expr_create(kind, left, right, 0, 0, 0);
 }
 
-struct expr* expr_unary(expr_t kind, struct expr* left) {
+expr* expr_unary(expr_t kind, expr* left) {
     return expr_create(kind, left, 0, 0, 0, 0);
 }
 
-struct expr* expr_int_lit(int value) {
+expr* expr_int_lit(int value) {
     return expr_create(EXPR_INT_LIT, 0, 0, 0, value, 0);
 }
 
-struct expr* expr_bool_lit(bool value) {
+expr* expr_bool_lit(bool value) {
     return expr_create(EXPR_BOOL_LIT, 0, 0, 0, value, 0);
 }
 
-struct expr* expr_char_lit(char value) {
+expr* expr_char_lit(char value) {
     return expr_create(EXPR_CHAR_LIT, 0, 0, 0, atoi(&value), 0);
 }
 
-struct expr* expr_str_lit(const char* value) {
+expr* expr_str_lit(const char* value) {
     return expr_create(EXPR_STR_LIT, 0, 0, 0, 0, value);
 }
 
-void print_expr(struct expr* expr, int tab_level) {
+void print_expr(expr* expr, int tab_level) {
     char tabs[MAX_INDENT] = { '\0' };
     char* tabs_ptr = tabs;
 

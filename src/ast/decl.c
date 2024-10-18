@@ -2,14 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct decl* decl_create(
+decl* decl_create(
     char* name,
-    struct type* type,
-    struct expr* value,
-    struct stmt* code,
-    struct decl* next
+    type* type,
+    expr* value,
+    stmt* code,
+    decl* next
 ) {
-    struct decl* d = malloc(sizeof(*d));
+    decl* d = malloc(sizeof(*d));
     d->name = name;
     d->type = type;
     d->value = value;
@@ -18,29 +18,29 @@ struct decl* decl_create(
     return d;
 }
 
-struct decl* decl_variable(
+decl* decl_variable(
     char* name,
-    struct type* type,
-    struct expr* value,
-    struct decl* next
+    type* type,
+    expr* value,
+    decl* next
 ) {
     return decl_create(name, type, value, 0, next);
 }
 
-struct decl* decl_prototype(char* name, struct type* type, struct decl* next) {
+decl* decl_prototype(char* name, type* type, decl* next) {
 return decl_create(name, type, 0, 0, next);
 }
 
-struct decl* decl_function(
+decl* decl_function(
     char* name,
-    struct type* type,
-    struct stmt* code,
-    struct decl* next
+    type* type,
+    stmt* code,
+    decl* next
 ) {
     return decl_create(name, type, 0, code, next);
 }
 
-void print_decl(struct decl* decl, int tab_level) {
+void print_decl(decl* decl, int tab_level) {
     char tabs[MAX_INDENT] = { '\0' };
     char* tabs_ptr = tabs;
 

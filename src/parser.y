@@ -2,7 +2,7 @@
 #include "ast.h"
 #include <stdio.h>
 #include <string.h>
-struct decl* parser_result = 0;
+decl* parser_result = 0;
 %}
 
 %union {
@@ -10,11 +10,11 @@ struct decl* parser_result = 0;
     int int_val;
     char* str_val;
     char* text;
-    struct decl* decl;
-    struct stmt* stmt;
-    struct expr* expr;
-    struct type* type;
-    struct param_list* param_list;
+    decl* decl;
+    stmt* stmt;
+    expr* expr;
+    type* type;
+    param_list* param_list;
 };
 
 /* Token definitions */
@@ -282,7 +282,7 @@ param_list  : param TOKEN_COMMA param_list
             ;
 
 param       : id TOKEN_COLON type
-                { $$ = param_list($1->name, $3, 0); }
+                { $$ = create_param_list($1->name, $3, 0); }
             ;
 
 %%

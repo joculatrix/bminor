@@ -2,19 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct param_list* param_list(
-    char* name,
-    struct type* type,
-    struct param_list* params
-) {
-    struct param_list* p = malloc(sizeof(*p));
+param_list* create_param_list(char* name, type* type, param_list* params) {
+    param_list* p = malloc(sizeof(*p));
     p->name = name;
     p->type = type;
     p->next = params;
     return p;
 }
 
-void print_param_list(struct param_list* param, int tab_level) {
+void print_param_list(param_list* param, int tab_level) {
     char tabs[MAX_INDENT] = { '\0' };
     char* tabs_ptr = tabs;
 

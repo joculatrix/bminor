@@ -13,8 +13,8 @@
 
 stack* symbol_stack = NULL;
 
-struct symbol* symbol_create(symbol_t kind, struct type* type, char* name) {
-    struct symbol* s = malloc(sizeof(*s));
+symbol* symbol_create(symbol_t kind, type* type, char* name) {
+    symbol* s = malloc(sizeof(*s));
     s->kind = kind;
     s->type = type;
     s->name = name;
@@ -44,7 +44,7 @@ int scope_level() {
     return symbol_stack->length;
 }
 
-void scope_bind(const char* name, struct symbol* sym) {
+void scope_bind(const char* name, symbol* sym) {
     list_node* scope = peek(symbol_stack);
     if (scope == NULL) {
         fprintf(
@@ -65,7 +65,7 @@ void scope_bind(const char* name, struct symbol* sym) {
     }
 }
 
-struct symbol* scope_lookup(const char* name) {
+symbol* scope_lookup(const char* name) {
     if (symbol_stack == NULL) {
         return NULL;
     }
@@ -73,20 +73,20 @@ struct symbol* scope_lookup(const char* name) {
     while (stack_p != NULL) {
         void* sym = ht_get(stack_p->table, name);
         if (sym != NULL) {
-            return (struct symbol*)sym;
+            return (symbol*)sym;
         }
         stack_p = stack_p->next;
     }
     return NULL;
 }
 
-struct symbol* scope_lookup_current(const char* name) {
+symbol* scope_lookup_current(const char* name) {
     if (symbol_stack == NULL) {
         return NULL;
     }
     void* sym = ht_get(symbol_stack->head->table, name);
     if (sym != NULL) {
-        return (struct symbol*)sym;
+        return (symbol*)sym;
     } else {
         return NULL;
     }
@@ -96,7 +96,7 @@ struct symbol* scope_lookup_current(const char* name) {
  * NAME RESOLUTION
  */
 
-void decl_resolve(struct decl* d) {
+void decl_resolve(decl* d) {
     if (!d) return;
 
     if (scope_lookup_current(d->name) != NULL) {
@@ -127,7 +127,7 @@ void decl_resolve(struct decl* d) {
     decl_resolve(d->next);
 }
 
-void expr_resolve(struct expr* e) {
+void expr_resolve(expr* e) {
     if (!e) return;
 
     if (e->kind == EXPR_IDENT) {
@@ -161,7 +161,7 @@ void expr_resolve(struct expr* e) {
     }
 }
 
-void stmt_resolve(struct stmt* s) {
+void stmt_resolve(stmt* s) {
     if (!s) return;
 
     switch (s->kind) {
@@ -217,7 +217,7 @@ void stmt_resolve(struct stmt* s) {
     stmt_resolve(s->next);
 }
 
-void param_list_resolve(struct param_list* p) {
+void param_list_resolve(param_list* p) {
     if (!p) return;
 
     p->symbol = symbol_create(SYMBOL_PARAM, p->type, p->name);

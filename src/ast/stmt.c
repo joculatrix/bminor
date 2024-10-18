@@ -2,21 +2,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct stmt* stmt_create(
+stmt* stmt_create(
     stmt_t kind,
-    struct decl* decl,
-    struct expr* init_expr,
-    struct expr* expr,
-    struct expr* next_expr,
-    struct stmt* body,
-    struct stmt* else_body,
-    struct stmt* next
+    decl* decl,
+    expr* init_expr,
+    expr* exp,
+    expr* next_expr,
+    stmt* body,
+    stmt* else_body,
+    stmt* next
 ) {
-    struct stmt* s = malloc(sizeof(*s));
+    stmt* s = malloc(sizeof(*s));
     s->kind = kind;
     s->decl = decl;
     s->init_expr = init_expr;
-    s->expr = expr;
+    s->expr = exp;
     s->next_expr = next_expr;
     s->body = body;
     s->else_body = else_body;
@@ -24,50 +24,50 @@ struct stmt* stmt_create(
     return s;
 }
 
-struct stmt* stmt_decl(struct decl* decl, struct stmt* next) {
+stmt* stmt_decl(decl* decl, stmt* next) {
     return stmt_create(STMT_DECL, decl, 0, 0, 0, 0, 0, next);
 }
 
-struct stmt* stmt_expr(struct expr* expr, struct stmt* next) {
-    return stmt_create(STMT_EXPR, 0, 0, expr, 0, 0, 0, next);
+stmt* stmt_expr(expr* exp, stmt* next) {
+    return stmt_create(STMT_EXPR, 0, 0, exp, 0, 0, 0, next);
 }
 
-struct stmt* stmt_if(struct expr* control, struct stmt* body, struct stmt* next) {
+stmt* stmt_if(expr* control, stmt* body, stmt* next) {
     return stmt_create(STMT_IF_ELSE, 0, 0, control, 0, body, 0, next);
 }
 
-struct stmt* stmt_if_else(
-    struct expr* control,
-    struct stmt* body,
-    struct stmt* else_body,
-    struct stmt* next
+stmt* stmt_if_else(
+    expr* control,
+    stmt* body,
+    stmt* else_body,
+    stmt* next
 ) {
     return stmt_create(STMT_IF_ELSE, 0, 0, control, 0, body, else_body, next);
 }
 
-struct stmt* stmt_for(
-    struct expr* init_expr,
-    struct expr* expr,
-    struct expr* next_expr,
-    struct stmt* body,
-    struct stmt* next
+stmt* stmt_for(
+    expr* init_expr,
+    expr* exp,
+    expr* next_expr,
+    stmt* body,
+    stmt* next
 ) {
-    return stmt_create(STMT_FOR, 0, init_expr, expr, next_expr, body, 0, next);
+    return stmt_create(STMT_FOR, 0, init_expr, exp, next_expr, body, 0, next);
 }
 
-struct stmt* stmt_print(struct expr* expr, struct stmt* next) {
-    return stmt_create(STMT_PRINT, 0, 0, expr, 0, 0, 0, next);
+stmt* stmt_print(expr* exp, stmt* next) {
+    return stmt_create(STMT_PRINT, 0, 0, exp, 0, 0, 0, next);
 }
 
-struct stmt* stmt_return(struct expr* expr, struct stmt* next) {
-    return stmt_create(STMT_RETURN, 0, 0, expr, 0, 0, 0, next);
+stmt* stmt_return(expr* exp, stmt* next) {
+    return stmt_create(STMT_RETURN, 0, 0, exp, 0, 0, 0, next);
 }
 
-struct stmt* stmt_block(struct stmt* body, struct stmt* next) {
+stmt* stmt_block(stmt* body, stmt* next) {
     return stmt_create(STMT_BLOCK, 0, 0, 0, 0, body, 0, next);
 }
 
-void print_stmt(struct stmt* stmt, int tab_level) {
+void print_stmt(stmt* stmt, int tab_level) {
     char tabs[MAX_INDENT] = { '\0' };
     char* tabs_ptr = tabs;
 

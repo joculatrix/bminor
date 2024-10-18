@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct type* curr_return = 0;
+type* curr_return = 0;
 
-bool type_equals(struct type* a, struct type* b) {
+bool type_equals(type* a, type* b) {
     if (a->kind == b->kind) {
         switch (a->kind) {
             case TYPE_ARRAY:
@@ -14,8 +14,8 @@ bool type_equals(struct type* a, struct type* b) {
                 if (!type_equals(a->subtype, b->subtype)) return false;
 
                 /* params: */
-                struct param_list* p_a = a->params;
-                struct param_list* p_b = b->params;
+                param_list* p_a = a->params;
+                param_list* p_b = b->params;
 
                 while (p_a != 0 && p_b != 0) {
                     if (!type_equals(p_a->type, p_b->type)) return false;
@@ -32,10 +32,10 @@ bool type_equals(struct type* a, struct type* b) {
     }
 }
 
-struct type* type_copy(struct type* t) {
+type* type_copy(type* t) {
     if (!t) return NULL;
 
-    struct type* copy = malloc(sizeof(*copy));
+    type* copy = malloc(sizeof(*copy));
     copy->kind = t->kind;
     if (t->subtype) {
         copy->subtype = type_copy(t->subtype);
@@ -46,10 +46,10 @@ struct type* type_copy(struct type* t) {
     return copy;
 }
 
-struct param_list* param_list_copy(struct param_list* p) {
+param_list* param_list_copy(param_list* p) {
     if (!p) return NULL;
 
-    struct param_list* copy = malloc(sizeof(*p));
+    param_list* copy = malloc(sizeof(*p));
     copy->name = p->name;
     copy->type = type_copy(p->type);
     copy->next = param_list_copy(p->next);
@@ -57,7 +57,7 @@ struct param_list* param_list_copy(struct param_list* p) {
     return copy;
 }
 
-void type_delete(struct type* t) {
+void type_delete(type* t) {
     if (!t) return;
 
     if (t->params) {
@@ -69,7 +69,7 @@ void type_delete(struct type* t) {
     free(t);
 }
 
-void param_list_delete(struct param_list* p) {
+void param_list_delete(param_list* p) {
     if (p->next) {
         param_list_delete(p->next);
     }
@@ -78,11 +78,11 @@ void param_list_delete(struct param_list* p) {
     free(p);
 }
 
-void decl_typecheck(struct decl* d) {
+void decl_typecheck(decl* d) {
     if (!d) return;
 
     if (d->value) {
-        struct type* t = expr_typecheck(d->value);
+        type* t = expr_typecheck(d->value);
         if (!type_equals(t, d->symbol->type)) {
             fprintf(
                 stderr,
@@ -96,7 +96,7 @@ void decl_typecheck(struct decl* d) {
     }
     if (d->code) {
         /* make return type of function available for checking */
-        struct type* t = curr_return == 0 ? 0 : type_copy(curr_return);
+        type* t = curr_return == 0 ? 0 : type_copy(curr_return);
         curr_return = type_copy(d->type->subtype);
 
         stmt_typecheck(d->code);
@@ -110,10 +110,10 @@ void decl_typecheck(struct decl* d) {
     decl_typecheck(d->next);
 }
 
-void stmt_typecheck(struct stmt* s) {
+void stmt_typecheck(stmt* s) {
     if (!s) return;
 
-    struct type* t;
+    type* t;
     switch (s->kind) {
         case STMT_EXPR:
             t = expr_typecheck(s->expr);
@@ -168,13 +168,13 @@ void stmt_typecheck(struct stmt* s) {
     stmt_typecheck(s->next);
 }
 
-struct type* expr_typecheck(struct expr* e) {
+type* expr_typecheck(expr* e) {
     if (!e) return 0;
 
-    struct type* left = expr_typecheck(e->left);
-    struct type* right = expr_typecheck(e->right);
+    type* left = expr_typecheck(e->left);
+    type* right = expr_typecheck(e->right);
 
-    struct type* result;
+    type* result;
 
     switch (e->kind) {
         case EXPR_AND:      __attribute__((fallthrough));
@@ -392,8 +392,8 @@ struct type* expr_typecheck(struct expr* e) {
             result = type_copy(left);
             break;
         case EXPR_FUN_CALL:
-            struct expr* arg_p = e->right;
-            struct param_list* param_p = left->params;
+            expr* arg_p = e->right;
+            param_list* param_p = left->params;
 
             while (arg_p && param_p) {
                 struct type* arg_type = expr_typecheck(arg_p);
