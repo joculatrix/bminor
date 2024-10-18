@@ -3,7 +3,6 @@
 #include <stdlib.h>
 
 struct type* curr_return = 0;
-bool returned = false;
 
 bool type_equals(struct type* a, struct type* b) {
     if (a->kind == b->kind) {
@@ -100,23 +99,12 @@ void decl_typecheck(struct decl* d) {
         struct type* t = curr_return == 0 ? 0 : type_copy(curr_return);
         curr_return = type_copy(d->type->subtype);
 
-        returned = false;
-
         stmt_typecheck(d->code);
-
-        if (d->type->subtype->kind != TYPE_VOID && !returned) {
-            fprintf(
-                stderr,
-                "error: function has no return of type `%s`\n",
-                type_t_str[d->type->subtype->kind]
-            );
-        }
 
         /* revert return state to previous */
         type_delete(curr_return);
         curr_return = t == 0 ? 0 : type_copy(t);
         type_delete(t);
-        returned = false;
     }
 
     decl_typecheck(d->next);
@@ -159,8 +147,6 @@ void stmt_typecheck(struct stmt* s) {
                     type_t_str[t->kind],
                     type_t_str[curr_return->kind]
                 );
-            } else {
-                returned = true;
             }
             type_delete(t);
             break;
