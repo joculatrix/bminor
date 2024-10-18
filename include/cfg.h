@@ -74,7 +74,6 @@ typedef struct {
 
 cfg_node* cfg_block_node(stmt* stmt);
 cfg_node* cfg_branch_node(expr* exp);
-int cfg_set_next(cfg_node* node, cfg_node* next);
 int cfg_set_true(cfg_node* node, cfg_node* true_branch);
 int cfg_set_false(cfg_node* node, cfg_node* false_branch);
 void cfg_push_back(cfg_node* branch, cfg_node* back);
