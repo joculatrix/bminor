@@ -99,16 +99,16 @@ void print_decl(struct decl* decl, int tab_level);
     X(STMT_BLOCK, "BLOCK")
 
 typedef enum {
- #define X(a, b)    a,
-    X_STMT_T
- #undef X
+    #define X(a, b)    a,
+        X_STMT_T
+    #undef X
 } stmt_t;
 
 /* not actually unused, but marking as such to make gcc quieter: */
 __attribute__((unused)) static char* stmt_t_str[] = {
- #define X(a, b)    b,
-    X_STMT_T
- #undef X
+    #define X(a, b)    b,
+        X_STMT_T
+    #undef X
 };
 
 struct stmt {
@@ -193,9 +193,9 @@ typedef enum {
 
 /* not actually unused, but marking as such to make gcc quieter: */
 __attribute__((unused)) static char* expr_t_str[] = {
- #define X(a, b)      b,
-    X_EXPR_T
- #undef X
+    #define X(a, b)      b,
+        X_EXPR_T
+    #undef X
 };
 
 struct expr {
