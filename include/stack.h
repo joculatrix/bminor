@@ -1,16 +1,27 @@
+/**********************************************************************
+ *                               STACK.H                              *
+ **********************************************************************
+ * This header defines a stack of hash tables (symbol tables) for name-
+ * resolution, with `push()`, `pop()`, and `peek()` functions. Because
+ * stacks are pretty simple, it's just defined in-header.
+ */
 #ifndef STACK_H
 #define STACK_H
 
 #include "hash.h"
 #include <stdlib.h>
 
+/**********************************************************************
+ *                                TYPES                               *
+ **********************************************************************/
+
+/* typedef goes up here so a `list_node` can have another `list_node`: */
 typedef struct list_node list_node;
 
 /* The list node defined here specifically holds symbol tables.
  * Obviously this type should change if reused for another application. */
 struct list_node {
     ht* table;
-    /* compiler gets unhappy when this doesn't say struct: */
     list_node* next;
 };
 
@@ -19,7 +30,9 @@ typedef struct {
     list_node* head;
 } stack;
 
-/* Because stacks are pretty simple, it's defined in-header. */
+/**********************************************************************
+ *                              FUNCTIONS                             *
+ **********************************************************************/
 
 /* Initializes a pointer to a new stack. The stack is initialized 
  * with length 0 -- it does not come with an initial node assigned

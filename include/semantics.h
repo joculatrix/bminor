@@ -1,3 +1,13 @@
+/**********************************************************************
+ *                              SEMANTICS.H                           *
+ **********************************************************************
+ * This header defines functions for name-resolution and type-checking.
+ * While defined in one header to keep the include folder smaller,
+ * name-resolution is implemented alongside `symbol.h` in `symbol.c`,
+ * while type-checking is in `typecheck.c` to keep source files a
+ * reasonable size. Maybe that's me being a bad C programmer. But I
+ * checked with my whole team (me) and they (I) said it was fine.
+ */
 #ifndef SEMANTICS_H
 #define SEMANTICS_H
 

@@ -1,3 +1,30 @@
+/**********************************************************************
+ *                                  AST.H                             *
+ **********************************************************************
+ * This header defines types and functions for constructing the Abstract
+ * Syntax Tree, which is done in the parser. At its top level, the AST
+ * is a list of `decl`s (declarations) of variables, which can be
+ * initialized to `expr`s (expressions), or functions, which can be
+ * initialized to `stmt`s (statements) which, in turn, can contain `decl`s
+ * or `expr`s. Much of the structure of the AST for this compiler was
+ * described in Douglas Thain's 'Introduction to Compilers and Language
+ * Design', but implementation and specifics (e.g. the various `expr`
+ * types) were left open-ended.
+ * 
+ * The AST also contains `type`s and `param_list`s (part of the type of
+ * a function).
+ * 
+ * Most functions are convenient constructors for variants of the AST
+ * node types, but there are also print functions for displaying the
+ * AST.
+ * 
+ * Also of note are the X macros in use. The `kind` enums for `stmt`,
+ * `expr`, and `type` are populated by the macros `X_STMT_T`, `X_EXPR_T`,
+ * and `X_TYPE_T`, which also hold associated strings which populate the
+ * arrays `stmt_t_str[]`, `expr_t_str[]`, and `type_t_str[]`. This allows,
+ * for example, for the type of an `expr` node `e` to be printed by
+ * referencing `expr_t_str[e->kind]`.
+ */
 #ifndef AST_H
 #define AST_H
 
@@ -12,9 +39,12 @@ typedef struct expr expr;
 typedef struct type type;
 typedef struct param_list param_list;
 
+/**********************************************************************
+ *                             DECLARATIONS                           *
+ **********************************************************************/
+
 /* A declaration of some variable or function and its type, optionally
- * initializing its value. A B-Minor program, at its top level, is a list of
- * declarations. */
+ * initializing its value. */
 struct decl {
     /* Identifier of the variable or function. */
     char* name;
@@ -55,6 +85,10 @@ decl* decl_function(
 );
 /* for displaying the AST: */
 void print_decl(decl* decl, int tab_level);
+
+/**********************************************************************
+ *                               STATEMENTS                           *
+ **********************************************************************/
 
 #define X_STMT_T \
     /* A local declaration such that: \
@@ -99,14 +133,14 @@ void print_decl(decl* decl, int tab_level);
     X(STMT_BLOCK, "BLOCK")
 
 typedef enum {
-    #define X(a, b)    a,
+    #define X(a, b) a,
         X_STMT_T
     #undef X
 } stmt_t;
 
 /* not actually unused, but marking as such to make gcc quieter: */
 __attribute__((unused)) static char* stmt_t_str[] = {
-    #define X(a, b)    b,
+    #define X(a, b) b,
         X_STMT_T
     #undef X
 };
@@ -122,9 +156,9 @@ struct stmt {
     stmt* next;
 };
 
-/* Function to initialize a stmt. Not recommended to call this function directly.
- * Instead, call one of the other stmt_ functions for specific use-cases to
- * avoid entering redundant unneeded values. */
+/* Function to initialize a stmt. Not recommended to call this function
+ * directly. Instead, call one of the other stmt_ functions for specific
+ * use-cases to avoid entering redundant unneeded values. */
 stmt* stmt_create(
     stmt_t kind,
     decl* decl,
@@ -157,6 +191,10 @@ stmt* stmt_block(stmt* body, stmt* next);
 /* for displaying the AST: */
 void print_stmt(stmt* stmt, int tab_level);
 
+/**********************************************************************
+ *                            EXPRESSIONS                             *
+ **********************************************************************/
+
 #define X_EXPR_T \
     X(EXPR_ADD, "ADD") \
     X(EXPR_SUB, "SUB") \
@@ -186,14 +224,14 @@ void print_stmt(stmt* stmt, int tab_level);
     X(EXPR_STR_LIT, "STR_LIT")
 
 typedef enum {
-    #define X(a, b)   a,
+    #define X(a, b) a,
         X_EXPR_T
     #undef X
 } expr_t;
 
 /* not actually unused, but marking as such to make gcc quieter: */
 __attribute__((unused)) static char* expr_t_str[] = {
-    #define X(a, b)      b,
+    #define X(a, b) b,
         X_EXPR_T
     #undef X
 };
@@ -229,6 +267,10 @@ expr* expr_str_lit(const char* value);
 /* for displaying the AST: */
 void print_expr(expr* expr, int tab_level);
 
+/**********************************************************************
+ *                                TYPES                               *
+ **********************************************************************/
+
 #define X_TYPE_T \
     X(TYPE_VOID, "void") \
     X(TYPE_BOOLEAN, "boolean") \
@@ -239,14 +281,14 @@ void print_expr(expr* expr, int tab_level);
     X(TYPE_FUNCTION, "function ()")
 
 typedef enum {
-    #define X(a, b)     a,
+    #define X(a, b) a,
         X_TYPE_T
     #undef X
 } type_t;
 
 /* not actually unused, but marking as such to make gcc quieter: */
 __attribute__((unused)) static char* type_t_str[] = {
-    #define X(a, b)     b,
+    #define X(a, b) b,
         X_TYPE_T
     #undef X
 };
@@ -265,6 +307,10 @@ type* type_array(type* subtype);
 type* type_function(type* subtype, param_list* params);
 /* for displaying the AST: */
 void print_type(type* type, int tab_level);
+
+/**********************************************************************
+ *                           PARAMETER LISTS                          *
+ **********************************************************************/
 
 struct param_list {
     char* name;

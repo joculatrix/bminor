@@ -1,7 +1,20 @@
+/**********************************************************************
+ *                              SYMBOL.H                              *
+ **********************************************************************
+ * This header defines the `symbol` type, for analysis, as well as
+ * functions for managing scope and looking up symbols in scope by name
+ * for the process of name-resolution.
+ * 
+ * See also: `semantics.h`.
+ */
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
 #include "ast.h"
+
+/**********************************************************************
+ *                                TYPES                               *
+ **********************************************************************/
 
 typedef struct symbol symbol;
 
@@ -17,6 +30,10 @@ struct symbol {
     const char* name;
     int which;
 };
+
+/**********************************************************************
+ *                              FUNCTIONS                             *
+ **********************************************************************/
 
 symbol* symbol_create(symbol_t kind, type* type, char* name);
 
