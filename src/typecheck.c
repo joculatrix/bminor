@@ -4,6 +4,10 @@
 
 type* curr_return = 0;
 
+/* * * * * * * * * * * *
+    UTILITY FUNCTIONS
+ * * * * * * * * * * * */
+
 bool type_equals(type* a, type* b) {
     if (a->kind == b->kind) {
         switch (a->kind) {
@@ -77,6 +81,10 @@ void param_list_delete(param_list* p) {
     free(p->name);
     free(p);
 }
+
+/* * * * * * * * * * * *
+    TYPECHECKING
+ * * * * * * * * * * * */
 
 void decl_typecheck(decl* d) {
     if (!d) return;
