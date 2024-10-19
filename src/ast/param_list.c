@@ -1,6 +1,4 @@
 #include "ast.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 param_list* create_param_list(char* name, type* type, param_list* params) {
     param_list* p = malloc(sizeof(*p));

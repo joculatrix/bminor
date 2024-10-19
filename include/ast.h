@@ -30,6 +30,8 @@
 
 #include "symbol.h"
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define MAX_INDENT 10
 

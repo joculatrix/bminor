@@ -1,6 +1,4 @@
 #include "ast.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 type* type_create(
     type_t kind,

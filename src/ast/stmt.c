@@ -1,6 +1,4 @@
 #include "ast.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 stmt* stmt_create(
     stmt_t kind,

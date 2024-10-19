@@ -12,6 +12,8 @@
 #define SEMANTICS_H
 
 #include "ast.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 /* name resolution -- in `symbol.c` */
 

@@ -1,6 +1,4 @@
 #include "semantics.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 type* curr_return = 0;
 

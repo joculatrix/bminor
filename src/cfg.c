@@ -1,6 +1,4 @@
 #include "cfg.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 /**********************************************************************
  *                          CFG UTILITY FUNCTIONS                     *

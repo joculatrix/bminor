@@ -1,6 +1,4 @@
 #include "ast.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 decl* decl_create(
     char* name,

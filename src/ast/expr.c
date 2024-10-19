@@ -1,6 +1,4 @@
 #include "ast.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 expr* expr_create(
     expr_t kind,

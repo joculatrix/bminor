@@ -11,6 +11,8 @@
 #define CFG_H
 
 #include "ast.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 /**********************************************************************
  *                                TYPES                               *

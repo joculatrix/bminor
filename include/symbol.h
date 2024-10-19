@@ -11,6 +11,8 @@
 #define SYMBOL_H
 
 #include "ast.h"
+#include "hash.h"
+#include "stack.h"
 
 /**********************************************************************
  *                                TYPES                               *
