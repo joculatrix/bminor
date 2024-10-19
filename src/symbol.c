@@ -12,6 +12,7 @@
  */
 
 stack* symbol_stack = NULL;
+bool main_exists = false;
 
 symbol* symbol_create(symbol_t kind, type* type, char* name) {
     symbol* s = malloc(sizeof(*s));
@@ -117,6 +118,17 @@ void decl_resolve(decl* d) {
         scope_bind(d->name, d->symbol);
 
         if (d->code) {
+            if (d->name == "main") {
+                if (d->type->subtype == "integer") {
+                    main_exists = true;
+                } else {
+                    fprintf(
+                        stderr,
+                        "error: expected `main` to return type `integer`\n"
+                    );
+                }
+            }
+
             scope_enter();
             param_list_resolve(d->type->params);
             stmt_resolve(d->code);
