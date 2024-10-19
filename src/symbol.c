@@ -200,12 +200,6 @@ void stmt_resolve(stmt* s) {
             break;
         case STMT_RETURN:
             expr_resolve(s->expr);
-            if (s->next) {
-                fprintf(
-                    stderr,
-                    "warning: statements following `return` will not execute\n"
-                );
-            }
             break;
         case STMT_BLOCK:
             scope_enter();

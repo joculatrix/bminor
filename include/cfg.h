@@ -19,6 +19,7 @@
 /* group of linear statements */
 typedef struct {
     stmt* stmt; /* retains its own `next` values until a conditional */
+    cfg_node* next;
 } cfg_block;
 
 /* branching statement */
@@ -37,14 +38,14 @@ union cfg_node_u {
 /* for safety */
 typedef enum {
     CFG_BLOCK,
-    CFG_BRANCH
+    CFG_BRANCH,
+    CFG_RETURN
 } cfg_node_t;
 
 /* the actual nodes in the graph structure */
 typedef struct {
     cfg_node_t kind;
     union cfg_node_u value;
-    cfg_node* next;
 } cfg_node;
 
 union cfg_u {
@@ -74,6 +75,7 @@ typedef struct {
 
 cfg_node* cfg_block_node(stmt* stmt);
 cfg_node* cfg_branch_node(expr* exp);
+cfg_node* cfg_return_node();
 int cfg_set_true(cfg_node* node, cfg_node* true_branch);
 int cfg_set_false(cfg_node* node, cfg_node* false_branch);
 void cfg_push_back(cfg_node* branch, cfg_node* back);
@@ -85,6 +87,7 @@ void cfg_push_back(cfg_node* branch, cfg_node* back);
 cfg* cfg_construct(decl* d);
 
 cfg_node* cfg_construct_block(stmt* s);
+void cfg_dead_code(stmt* s);
 cfg_node* cfg_for_loop(stmt* s);
 cfg_node* cfg_if_else(stmt* s);
 

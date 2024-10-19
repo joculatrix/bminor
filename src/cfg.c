@@ -10,7 +10,7 @@ cfg_node* cfg_block_node(stmt* stmt) {
     cfg_node* node = malloc(sizeof(*node));
     node->kind = CFG_BLOCK;
     node->value.block->stmt = stmt;
-    node->next = NULL;
+    node->value.block->next = NULL;
     return node;
 }
 
@@ -18,7 +18,12 @@ cfg_node* cfg_branch_node(expr* exp) {
     cfg_node* node = malloc(sizeof(*node));
     node->kind = CFG_BRANCH;
     node->value.branch->condition = exp;
-    node->next = NULL;
+    return node;
+}
+
+cfg_node* cfg_return_node() {
+    cfg_node* node = malloc(sizeof(*node));
+    node->kind = CFG_RETURN;
     return node;
 }
 
@@ -49,11 +54,21 @@ int cfg_set_false(cfg_node* node, cfg_node* false_branch) {
 }
 
 void cfg_push_back(cfg_node* node, cfg_node* back) {
-    cfg_node* p = node;
-    while (p->next != NULL) {
-        p = p->next;
+    switch (node->kind) {
+        case CFG_BLOCK:
+            if (node->value.block->next == NULL) {
+                node->value.block->next = back;
+            } else {
+                cfg_push_back(node->value.block->next, back);
+            }
+            break;
+        case CFG_BRANCH:
+            cfg_push_back(node->value.branch->true_branch, back);
+            cfg_push_back(node->value.branch->false_branch, back);
+            break;
+        case CFG_RETURN:
+            break;
     }
-    p->next = back;
 }
 
 /**********************************************************************
@@ -73,9 +88,7 @@ cfg* cfg_construct(decl* d) {
         cfg->kind = FUNC;
         cfg->symbol = d->symbol;
         cfg->value.cfg_node = cfg_construct_block(d->code);
-    } else {
-        return d->next;
-    }
+    } else return d->next;
 
     cfg->next = cfg_construct(d->next);
     return cfg;
@@ -86,42 +99,63 @@ cfg_node* cfg_construct_block(stmt* s) {
     
     cfg_node* node;
     stmt* p = s;
-    while (p->next != NULL) {
-        switch(p->next->kind) {
+    stmt* q = s; /* follower */
+    while (p != NULL) {
+        switch(p->kind) {
             case STMT_FOR:
-                stmt* for_loop = p->next;
-                p->next = NULL;
+                if (q != p) q->next = NULL;
                 node = cfg_block_node(s);
 
-                cfg_node* loop_node = cfg_for_loop(for_loop);
-                cfg_push_back(loop_node, cfg_construct_block(for_loop->next));
+                cfg_node* loop_node = cfg_for_loop(p);
+                cfg_push_back(
+                    loop_node->value.branch->false_branch,
+                    cfg_construct_block(p->next)
+                );
 
                 if (node) {
-                    node->next = loop_node;
+                    cfg_push_back(node, loop_node);
                     return node;
-                } else {
-                    return loop_node;
-                }
+                } else return loop_node;
             case STMT_IF_ELSE:
-                stmt* if_else = p->next;
-                p->next = NULL;
+                if (q != p) q->next = NULL;
                 node = cfg_block_node(s);
 
-                cfg_node* if_node = cfg_if_else(if_else);
-                cfg_push_back(if_node, cfg_construct_block(if_else->next));
+                cfg_node* if_node = cfg_if_else(p);
+                cfg_push_back(if_node, cfg_construct_block(p->next));
                 
                 if (node) {
-                    node->next = if_node;
+                    cfg_push_back(node, if_node);
                     return node;
-                } else {
-                    return loop_node;
-                }
+                } else return loop_node;
+            case STMT_RETURN:
+                stmt* dead = p->next;
+                p->next = NULL;
+                node = cfg_block_node(s);
+                
+                if (dead) cfg_dead_code(dead);
+
+                if (node) {
+                    cfg_push_back(node, cfg_return_node());
+                    return node;
+                } else return cfg_return_node();
             default:
+                q = p;
                 p = p->next;
                 break;
         }
     }
     return cfg_block_node(s);
+}
+
+void cfg_dead_code(stmt* s) {
+    stmt* p = s;
+    while (p != NULL) {
+        fpritnf(
+            stderr,
+            "warning: unreachable\n"
+        );
+        p = p->next;
+    }
 }
 
 cfg_node* cfg_for_loop(stmt* s) {
@@ -137,9 +171,11 @@ cfg_node* cfg_for_loop(stmt* s) {
 
     /* set branches (false branch just exits loop): */
     cfg_set_true(comp, cfg_construct_block(s->body));
+    cfg_push_back(comp->value.branch->true_branch, comp);
+
     cfg_set_false(comp, cfg_block_node(NULL));
 
-    init->next = comp;
+    cfg_push_back(init, comp);
     return init;
 }
 
