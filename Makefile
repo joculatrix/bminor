@@ -19,7 +19,7 @@ lexer: $(SRC)/scanner.flex
 parser: $(SRC)/parser.y
 	bison $(BISONFLAGS) --output=$(PARSER) $(SRC)/parser.y
 
-bmcc: lexer parser
+bmcc: parser lexer
 	$(CC) $(CFLAGS) -o bmcc $(INCLUDE) $(SRC)/main.c $(LEXER) $(PARSER) \
 		$(AST) $(SEMANTIC)
 

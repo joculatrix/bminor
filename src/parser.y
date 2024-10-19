@@ -79,7 +79,7 @@ decl* parser_result = 0;
 
 /* Return types */
 %type <decl> program decl_list decl
-%type <stmt> stmt stmt_list block
+%type <stmt> stmt stmt_list block print_list print_item
 %type <expr> expr term factor arg args_list literal array item item_list id
 %type <type> type data_type func_type
 %type <param_list> param_list param
@@ -124,8 +124,8 @@ stmt        : decl
             | TOKEN_KW_FOR TOKEN_PAREN_LEFT expr TOKEN_SEMICOLON expr TOKEN_SEMICOLON expr
               TOKEN_PAREN_RIGHT stmt
                 { $$ = stmt_for($3, $5, $7, $9, 0); }
-            | TOKEN_KW_PRINT expr TOKEN_SEMICOLON
-                { $$ = stmt_print($2, 0); }
+            | TOKEN_KW_PRINT print_item print_list TOKEN_SEMICOLON
+                { $$ = $2; $$->next = $3; }
             | TOKEN_KW_RETURN expr TOKEN_SEMICOLON
                 { $$ = stmt_return($2, 0); }
             | block
@@ -285,6 +285,14 @@ param       : id TOKEN_COLON type
                 { $$ = create_param_list($1->name, $3, 0); }
             ;
 
+print_list  : TOKEN_COMMA print_item print_list
+                { $$ = $2; $$->next = $3; }
+            | /* epsilon */
+                { $$ = 0; }
+            ;
+
+print_item  : expr
+                { $$ = stmt_print($1, 0); }
 %%
 
 int yyerror(char* s) {
