@@ -11,6 +11,7 @@ cfg_node* cfg_block_node(stmt* stmt) {
     node->kind = CFG_BLOCK;
     node->value.block->stmt = stmt;
     node->value.block->next = NULL;
+    node->prev = NULL;
     return node;
 }
 
@@ -18,18 +19,21 @@ cfg_node* cfg_branch_node(expr* exp) {
     cfg_node* node = malloc(sizeof(*node));
     node->kind = CFG_BRANCH;
     node->value.branch->condition = exp;
+    node->prev = NULL;
     return node;
 }
 
 cfg_node* cfg_return_node() {
     cfg_node* node = malloc(sizeof(*node));
     node->kind = CFG_RETURN;
+    node->prev = NULL;
     return node;
 }
 
 int cfg_set_true(cfg_node* node, cfg_node* true_branch) {
     if (node->kind == CFG_BRANCH) {
         node->value.branch->true_branch = true_branch;
+        true_branch->prev = node;
         return 0;
     } else {
         fprintf(
@@ -43,6 +47,7 @@ int cfg_set_true(cfg_node* node, cfg_node* true_branch) {
 int cfg_set_false(cfg_node* node, cfg_node* false_branch) {
     if (node->kind == CFG_BRANCH) {
         node->value.branch->false_branch = false_branch;
+        false_branch->prev = node;
         return 0;
     } else {
         fprintf(
@@ -58,6 +63,7 @@ void cfg_push_back(cfg_node* node, cfg_node* back) {
         case CFG_BLOCK:
             if (node->value.block->next == NULL) {
                 node->value.block->next = back;
+                back->prev = node;
             } else {
                 cfg_push_back(node->value.block->next, back);
             }
@@ -88,6 +94,9 @@ cfg* cfg_construct(decl* d) {
         cfg->kind = FUNC;
         cfg->symbol = d->symbol;
         cfg->value.cfg_node = cfg_construct_block(d->code);
+        if (d->type->subtype == TYPE_VOID) {
+            cfg_push_back(cfg->value.cfg_node, cfg_return_node());
+        }
     } else return d->next;
 
     cfg->next = cfg_construct(d->next);

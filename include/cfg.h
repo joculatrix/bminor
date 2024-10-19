@@ -16,6 +16,8 @@
  *                                TYPES                               *
  **********************************************************************/
 
+typedef struct cfg_node cfg_node;
+
 /* group of linear statements */
 typedef struct {
     stmt* stmt; /* retains its own `next` values until a conditional */
@@ -43,10 +45,11 @@ typedef enum {
 } cfg_node_t;
 
 /* the actual nodes in the graph structure */
-typedef struct {
+struct cfg_node {
     cfg_node_t kind;
+    cfg_node* prev;
     union cfg_node_u value;
-} cfg_node;
+};
 
 union cfg_u {
     expr* exp; /* for global variables */
