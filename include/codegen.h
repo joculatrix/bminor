@@ -55,7 +55,7 @@ const char* symbol_address(symbol* s);
 
 /* for strings: */
 
-int add_str(const char* s);
+int add_str(const char* s, bool newline);
 const char* str_label(int label);
 
 /* for register allocation: */

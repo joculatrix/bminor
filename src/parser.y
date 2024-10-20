@@ -108,7 +108,14 @@ decl        : id TOKEN_COLON data_type TOKEN_OP_ASSIGN expr TOKEN_SEMICOLON
             ;
 
 stmt_list   : stmt stmt_list
-                { $$ = $1; $1->next = $2; }
+                {
+                    $$ = $1;
+                    if ($1->kind == STMT_PRINT) {
+                        stmt_print_pushback($$, $2);
+                    } else {
+                        $1->next = $2;
+                    }
+                }
             | /* epsilon */
                 { $$ = 0; }
             ;

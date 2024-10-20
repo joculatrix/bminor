@@ -191,6 +191,8 @@ stmt* stmt_for(
 stmt* stmt_print(expr* exp, stmt* next);
 stmt* stmt_return(expr* exp, stmt* next);
 stmt* stmt_block(stmt* body, stmt* next);
+/* for adding proceeding statements to the end of print lists */
+void stmt_print_pushback(stmt* print, stmt* next);
 /* for displaying the AST: */
 void print_stmt(stmt* stmt, int tab_level);
 

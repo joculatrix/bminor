@@ -65,6 +65,14 @@ stmt* stmt_block(stmt* body, stmt* next) {
     return stmt_create(STMT_BLOCK, 0, 0, 0, 0, body, 0, next);
 }
 
+void stmt_print_pushback(stmt* print, stmt* next) {
+    stmt* p = print;
+    while (p->next != NULL) {
+        p = p->next;
+    }
+    p->next = next;
+}
+
 void print_stmt(stmt* stmt, int tab_level) {
     char tabs[MAX_INDENT] = { '\0' };
     char* tabs_ptr = tabs;
