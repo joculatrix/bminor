@@ -1,10 +1,11 @@
 #include "semantics.h"
 
 type* curr_return = 0;
+int which_counter = 0;
 
-/* * * * * * * * * * * *
-    UTILITY FUNCTIONS
- * * * * * * * * * * * */
+/**********************************************************************
+ *                          UTILITY FUNCTIONS                         *
+ **********************************************************************/
 
 bool type_equals(type* a, type* b) {
     if (a->kind == b->kind) {
@@ -99,13 +100,27 @@ void decl_typecheck(decl* d) {
             );
         }
         type_delete(t);
+
+        if (d->symbol->kind == SYMBOL_LOCAL) {
+            d->symbol->which = which_counter++;
+        }
     }
     if (d->code) {
         /* make return type of function available for checking */
         type* t = curr_return == 0 ? 0 : type_copy(curr_return);
         curr_return = type_copy(d->type->subtype);
 
+        which_counter = 0;
+
+        param_list* param_p = d->type->params;
+        while (param_p != NULL) {
+            param_p->symbol->which = which_counter++;
+            param_p = param_p->next;
+        }
+
         stmt_typecheck(d->code);
+
+        d->symbol->stack_size = which_counter;
 
         /* revert return state to previous */
         type_delete(curr_return);

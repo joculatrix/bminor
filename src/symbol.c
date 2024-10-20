@@ -109,12 +109,12 @@ void decl_resolve(decl* d) {
         d->symbol = symbol_create(kind, d->type, d->name);
 
         expr_resolve(d->value);
-        scope_bind(d->name, d->symbol);
-
+        
         if (d->code) {
             if (d->name == "main") {
                 if (d->type->subtype == "integer") {
                     main_exists = true;
+                    d->name = "_start";
                 } else {
                     fprintf(
                         stderr,
@@ -122,11 +122,14 @@ void decl_resolve(decl* d) {
                     );
                 }
             }
+            scope_bind(d->name, d->symbol);
 
             scope_enter();
             param_list_resolve(d->type->params);
             stmt_resolve(d->code);
             scope_exit();
+        } else {
+            scope_bind(d->name, d->symbol);
         }
     }
 

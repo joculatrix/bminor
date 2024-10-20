@@ -63,6 +63,7 @@ struct decl {
     decl* next;
     /* Points to the symbol initialized by this declaration. */
     symbol* symbol;
+    int reg;
 };
 
 decl* decl_create(
@@ -247,6 +248,7 @@ struct expr {
     const char* str_value;
     /* Points to the symbol represented by this expression, if EXPR_IDENT. */
     symbol* symbol;
+    int reg;
 };
 
 /* Function to create an expr. Not recommended to call this function directly.

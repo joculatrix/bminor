@@ -31,6 +31,7 @@ struct symbol {
     type* type;
     const char* name;
     int which;
+    int stack_size; // num of params and locals in function
 };
 
 /**********************************************************************
