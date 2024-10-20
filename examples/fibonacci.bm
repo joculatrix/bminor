@@ -1,0 +1,17 @@
+/* using this example to test function prototyping works as expected: */
+fibonacci: function integer (n: integer);
+
+main: function integer () = {
+    print fibonacci(10);
+    return 0;
+}
+
+fibonacci: function integer (i: integer) = {
+    if (i == 0) {
+        return 0;
+    } else if (i == 1) {
+        return 1;
+    } else {
+        return fibonacci(n - 1) + fibonacci(n - 2);
+    }
+}
