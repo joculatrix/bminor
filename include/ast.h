@@ -28,12 +28,13 @@
 #ifndef AST_H
 #define AST_H
 
-#include "symbol.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define MAX_INDENT 10
+
+typedef struct symbol symbol;
 
 typedef struct decl decl;
 typedef struct stmt stmt;
@@ -305,11 +306,13 @@ struct type {
     type* subtype;
     /* For functions. */
     param_list* params;
+    /* For arrays. */
+    int size;
 };
 
-type* type_create(type_t kind, type* subtype, param_list* params);
+type* type_create(type_t kind, type* subtype, param_list* params, int size);
 type* type_data(type_t kind);
-type* type_array(type* subtype);
+type* type_array(type* subtype, int size);
 type* type_function(type* subtype, param_list* params);
 /* for displaying the AST: */
 void print_type(type* type, int tab_level);

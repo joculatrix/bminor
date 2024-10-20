@@ -11,6 +11,7 @@
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
+#include "ast.h"
 #include "cfg.h"
 #include "semantics.h"
 #include <string.h>
@@ -18,28 +19,10 @@
 /**********************************************************************
  *                           TYPES & GLOBALS                          *
  **********************************************************************/
-
-int label_count = 0;
-int str_count = 0;
-
 typedef struct {
     const char* name;
     bool used;
 } reg;
-
-const int NUM_SCRATCH = 7;
-
-reg scratch[] = {
-    { .name = "%rbx", .used = false },
-    { .name = "%r10", .used = false },
-    { .name = "%r11", .used = false },
-    { .name = "%r12", .used = false },
-    { .name = "%r13", .used = false },
-    { .name = "%r14", .used = false },
-    { .name = "%r15", .used = false },
-};
-
-const char* ARG_REGS[] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
 
 typedef struct data_entry data_entry;
 
@@ -47,8 +30,6 @@ struct data_entry {
     const char* entry;
     data_entry* next;
 };
-
-data_entry* data;
 
 /**********************************************************************
  *                              FUNCTIONS                             *
@@ -74,12 +55,17 @@ const char* label_name(int label);
 
 /* codegen: */
 
+void codegen(cfg* cfg);
+
+void cfg_codegen(cfg* cfg);
+
 void expr_bool_codegen(expr* e, const char* instruction, int true_label);
 void bool_val_codegen(expr* e, const char* instruction);
 
 void decl_codegen(decl* d);
 
-void func_codegen(symbol* f, stmt* code);
+void func_codegen(cfg* func_decl);
+void func_body_codegen(const char* func_name, cfg_node* node);
 
 void stmt_codegen(stmt* s, const char* func_name);
 void expr_codegen(expr* e);

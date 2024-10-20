@@ -34,7 +34,7 @@ SOFTWARE.
 #define INITIAL_CAPACITY 16
 
 #define FNV_OFFSET 14695981038346656037UL
-#define FNV_PRIME 1099511628211UL
+#define FNV_PRIME  1099511628211UL
 
 typedef struct {
     const char* key; /* NULL if empty */

@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 decl* parser_result = 0;
+
+extern int yylineno;
 %}
 
 %union {
@@ -10,11 +12,11 @@ decl* parser_result = 0;
     int int_val;
     char* str_val;
     char* text;
-    decl* decl;
-    stmt* stmt;
-    expr* expr;
-    type* type;
-    param_list* param_list;
+    struct decl* decl;
+    struct stmt* stmt;
+    struct expr* expr;
+    struct type* type;
+    struct param_list* param_list;
 };
 
 /* Token definitions */
@@ -81,11 +83,13 @@ decl* parser_result = 0;
 %type <decl> program decl_list decl
 %type <stmt> stmt stmt_list block print_list print_item
 %type <expr> expr term factor arg args_list literal array item item_list id
-%type <type> type data_type func_type
+%type <type> type data_type func_type array_decl
 %type <param_list> param_list param
 
 /* expect dangling else: */
 %expect 1
+
+%locations
 
 %%
 
@@ -103,6 +107,8 @@ decl        : id TOKEN_COLON data_type TOKEN_OP_ASSIGN expr TOKEN_SEMICOLON
                 { $$ = decl_variable($1->name, $3, $5, 0); }
             | id TOKEN_COLON func_type TOKEN_OP_ASSIGN stmt
                 { $$ = decl_function($1->name, $3, $5, 0); }
+            | id TOKEN_COLON array_decl TOKEN_OP_ASSIGN expr TOKEN_SEMICOLON
+                { $$ = decl_variable($1->name, $3, $5, 0); }
             | id TOKEN_COLON type TOKEN_SEMICOLON
                 { $$ = decl_prototype($1->name, $3, 0); }
             ;
@@ -259,6 +265,12 @@ type        : data_type
                 { $$ = $1; }
             | func_type
                 { $$ = $1; }
+            | TOKEN_KW_ARRAY TOKEN_SQ_LEFT TOKEN_SQ_RIGHT data_type
+                { $$ = type_array($4, 0); }
+            ;
+
+array_decl  : TOKEN_KW_ARRAY TOKEN_SQ_LEFT TOKEN_LIT_INTEGER TOKEN_SQ_RIGHT data_type
+                { $$ = type_array($5, $3); }
             ;
 
 data_type   : TOKEN_KW_VOID
@@ -271,10 +283,6 @@ data_type   : TOKEN_KW_VOID
                 { $$ = type_data(TYPE_INTEGER); }
             | TOKEN_KW_STRING
                 { $$ = type_data(TYPE_STRING); }
-            | TOKEN_KW_ARRAY TOKEN_SQ_LEFT TOKEN_SQ_RIGHT type
-                { $$ = type_array($4); }
-            | TOKEN_KW_ARRAY TOKEN_SQ_LEFT TOKEN_LIT_INTEGER TOKEN_SQ_RIGHT type
-                { $$ = type_array($5); }
             ;
 
 func_type   : TOKEN_KW_FUNCTION type TOKEN_PAREN_LEFT param_list TOKEN_PAREN_RIGHT
@@ -303,6 +311,6 @@ print_item  : expr
 %%
 
 int yyerror(char* s) {
-    printf("parse error: %s\n", s);
+    printf("[error] line %d: %s\n", yylineno, s);
     return 1;
 }

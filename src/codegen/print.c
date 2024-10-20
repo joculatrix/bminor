@@ -1,5 +1,10 @@
 #include "codegen.h"
 
+extern int label_count;
+extern int str_count;
+extern reg scratch[];
+extern data_entry* data;
+
 /**********************************************************************
  *                          PRINT FUNCTIONS                           *
  **********************************************************************/
@@ -69,20 +74,20 @@ void print_str_codegen(int reg) {
 void print_str_lit_codegen(const char* s) {
     int orig_size = strlen(s);
     int prev_size = 0;
-    char* str = strtok(s, '\n');
+    char* str = strtok(s, "\n");
     bool newline = false;
 
     while (str != NULL) {
         newline = strlen(str) < (orig_size - prev_size);
 
-        int str = add_str(str, newline);
+        int str_lit = add_str(str, newline);
         printf( /* move string length to third arg */
             "MOVQ %s_len, %%rdx\n",
-            str_label(str)
+            str_label(str_lit)
         );
         printf( /* move string to second arg */
             "MOVQ %s ,%%rsi\n",
-            str_label(str)
+            str_label(str_lit)
         );
         printf( /* move "1" (stdout) to first arg */
             "MOVQ $1, %%rdi\n"
@@ -95,7 +100,7 @@ void print_str_lit_codegen(const char* s) {
         );
 
         prev_size += strlen(str);
-        str = strtok(NULL, '\n');
+        str = strtok(NULL, "\n");
     }
 }
 

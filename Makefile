@@ -9,7 +9,10 @@ LEXER	= $(SRC)/lex.yy.c
 PARSER	= $(SRC)/parser.yy.c
 AST		= $(SRC)/ast/decl.c $(SRC)/ast/expr.c $(SRC)/ast/param_list.c \
 		  $(SRC)/ast/stmt.c $(SRC)/ast/type.c
-SEMANTIC= $(SRC)/hash.c $(SRC)/symbol.c $(SRC)/typecheck.c
+SEMANTIC= $(SRC)/hash.c $(SRC)/stack.c $(SRC)/symbol.c $(SRC)/typecheck.c
+CONSTF  = $(SRC)/constant_fold.c
+CFLAGS	= $(SRC)/cfg.c
+CODEGEN = $(SRC)/codegen/codegen.c $(SRC)/codegen/print.c $(SRC)/codegen/utility.c
 
 BISONFLAGS = --header=include/yy.h
 
@@ -21,7 +24,7 @@ parser: $(SRC)/parser.y
 
 bmcc: parser lexer
 	$(CC) $(CFLAGS) -o bmcc $(INCLUDE) $(SRC)/main.c $(LEXER) $(PARSER) \
-		$(AST) $(SEMANTIC)
+		$(AST) $(SEMANTIC) $(CONSTF) $(CFG) $(CODEGEN)
 
 .PHONY: debug debug-parser
 

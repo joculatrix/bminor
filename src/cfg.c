@@ -7,6 +7,7 @@
 cfg_node* cfg_block_node(stmt* stmt) {
     cfg_node* node = malloc(sizeof(*node));
     node->kind = CFG_BLOCK;
+    node->value.block = malloc(sizeof(cfg_block));
     node->value.block->stmt = stmt;
     node->value.block->next = NULL;
     node->prev = NULL;
@@ -157,7 +158,7 @@ cfg_node* cfg_construct_block(stmt* s) {
 void cfg_dead_code(stmt* s) {
     stmt* p = s;
     while (p != NULL) {
-        fpritnf(
+        fprintf(
             stderr,
             "warning: unreachable\n"
         );

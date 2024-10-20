@@ -1,4 +1,5 @@
 #include "semantics.h"
+#include "symbol.h"
 
 type* curr_return = 0;
 int which_counter = 0;
@@ -222,7 +223,7 @@ type* expr_typecheck(expr* e) {
             }
             __attribute__((fallthrough));
         case EXPR_BOOL_LIT:
-            result = type_create(TYPE_BOOLEAN, 0, 0);
+            result = type_create(TYPE_BOOLEAN, 0, 0, 0);
             break;
         case EXPR_NOT:
             if (left->kind != TYPE_BOOLEAN) {
@@ -231,7 +232,7 @@ type* expr_typecheck(expr* e) {
                     "error: cannot negate non-boolean expression\n"
                 );
             }
-            result = type_create(TYPE_BOOLEAN, 0, 0);
+            result = type_create(TYPE_BOOLEAN, 0, 0, 0);
             break;
         case EXPR_ARRAY:
             struct expr* item_p = e->right;
@@ -246,16 +247,16 @@ type* expr_typecheck(expr* e) {
                 }
                 item_p = item_p->right;
             }
-            result = type_create(TYPE_ARRAY, left, 0);
+            result = type_create(TYPE_ARRAY, left, 0, e->symbol->type->size);
             break;
         case EXPR_CHAR_LIT:
-            result = type_create(TYPE_CHARACTER, 0, 0);
+            result = type_create(TYPE_CHARACTER, 0, 0, 0);
             break;
         case EXPR_INT_LIT:
-            result = type_create(TYPE_INTEGER, 0, 0);
+            result = type_create(TYPE_INTEGER, 0, 0, 0);
             break;
         case EXPR_STR_LIT:
-            result = type_create(TYPE_STRING, 0, 0);
+            result = type_create(TYPE_STRING, 0, 0, 0);
             break;
         case EXPR_IDENT:
             result = type_copy(e->symbol->type);

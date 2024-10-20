@@ -19,6 +19,7 @@
  **********************************************************************/
 
 typedef struct cfg_node cfg_node;
+typedef struct cfg cfg;
 
 /* group of linear statements */
 typedef struct {
@@ -65,12 +66,12 @@ typedef enum {
 
 /* Top-level structure to encompass both global variable declarations
  * and the CFGs for functions in one IR */
-typedef struct {
+struct cfg {
     cfg_t kind;
     symbol* symbol;
     union cfg_u value;
     cfg* next;
-} cfg;
+};
 
 /**********************************************************************
  *                              FUNCTIONS                             *

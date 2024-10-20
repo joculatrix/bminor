@@ -1,4 +1,11 @@
 #include "codegen.h"
+#include "symbol.h"
+
+extern int label_count;
+extern int str_count;
+extern const int NUM_SCRATCH;
+extern reg scratch[];
+extern data_entry* data;
 
 /**********************************************************************
  *                         UTILITY FUNCTIONS                          *
@@ -30,7 +37,7 @@ int add_str(const char* s, bool newline) {
     
     if (0 > asprintf(
         &entry->entry,
-        "%s: db %s%s\n",
+        "%s: db \"%s\"%s\n",
         str_label(label),
         s,
         newline ? ", $0xA" : ""

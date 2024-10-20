@@ -1,8 +1,107 @@
 #include "codegen.h"
+#include "symbol.h"
+
+int label_count = 0;
+int str_count = 0;
+
+const int NUM_SCRATCH = 7;
+
+reg scratch[] = {
+    { .name = "%rbx", .used = false },
+    { .name = "%r10", .used = false },
+    { .name = "%r11", .used = false },
+    { .name = "%r12", .used = false },
+    { .name = "%r13", .used = false },
+    { .name = "%r14", .used = false },
+    { .name = "%r15", .used = false },
+};
+
+const char* ARG_REGS[] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
+
+data_entry* data;
 
 /**********************************************************************
  *                              CODEGEN                               *
  **********************************************************************/
+
+void codegen(cfg* cfg) {
+    printf("section .text\n");
+    cfg_codegen(cfg);
+    printf("section .data\n");
+    while (data != NULL) {
+        printf("%s", data->entry);
+        data = data->next;
+    }
+}
+
+void cfg_codegen(cfg* cfg) {
+    if (!cfg) return;
+
+    if (cfg->kind == VAR) {
+        data_entry* entry = malloc(sizeof(*entry));
+        switch (cfg->symbol->type->kind) {
+            case TYPE_BOOLEAN:   __attribute__((fallthrough));
+            case TYPE_CHARACTER: __attribute__((fallthrough));
+            case TYPE_INTEGER:
+                if (0 > asprintf(
+                    &entry->entry,
+                    "%s: $%d\n",
+                    cfg->symbol->name,
+                    cfg->value.exp->value
+                )) {
+                    fprintf(
+                        stderr,
+                        "error: failed to allocate global variable\n"
+                    );
+                }
+                entry->next = data;
+                data = entry;
+                break;
+            case TYPE_STRING:
+                if (0 > asprintf(
+                    &entry->entry,
+                    "%s: \"%s\"\n",
+                    cfg->symbol->name,
+                    cfg->value.exp->str_value
+                )) {
+                    fprintf(
+                        stderr,
+                        "error: failed to allocate global variable\n"
+                    );
+                }
+                entry->next = data;
+                data = entry;
+                break;
+            case TYPE_ARRAY:
+                if (0 > asprintf(&entry->entry, "%s: ", cfg->symbol->name)) {
+                    fprintf(
+                        stderr,
+                        "error: failed to allocate global variable\n"
+                    );
+                }
+                expr* item = cfg->value.exp;
+                while (item != NULL) {
+                    const char* item_txt;
+                    if (0 > asprintf(&item_txt, "%d, ", item->value)) {
+                        fprintf(
+                            stderr,
+                            "error: failed to allocate global variable\n"
+                        );
+                    }
+                    strcat(entry->entry, item_txt);
+                    item = item->right;
+                }
+                strcat(entry->entry, "\n");
+                entry->next = data;
+                data = entry;
+                break;
+        }
+    } else {
+        func_codegen(cfg);
+    }
+
+    cfg_codegen(cfg->next);
+}
 
 void expr_bool_codegen(
     expr* e,
@@ -102,18 +201,16 @@ void decl_codegen(decl* d) {
             }
             entry->next = data;
             data = entry;
-        } else if (d->code) {
-            func_codegen(d->symbol, d->code);
         }
     }
 }
 
-void func_codegen(symbol* f, stmt* code) {
-    printf(".global %s\n", f->name);
-    printf("%s:\n", f->name);
+void func_codegen(cfg* func_decl) {
+    printf(".global %s\n", func_decl->symbol->name);
+    printf("%s:\n", func_decl->symbol->name);
     printf("MOVQ %%rsp, %%rbp\n");
     int i = 0;
-    param_list* p = f->type->params;
+    param_list* p = func_decl->symbol->type->params;
     while (p != NULL) {
         if (i < 6) {
             printf(
@@ -125,7 +222,7 @@ void func_codegen(symbol* f, stmt* code) {
         p = p->next;
     }
 
-    int locals = f->stack_size - i;
+    int locals = func_decl->symbol->stack_size - i;
 
     printf("SUBQ $%d, %%rsp\n", locals * 8);
 
@@ -135,9 +232,9 @@ void func_codegen(symbol* f, stmt* code) {
     printf("PUSHQ %%r14\n");
     printf("PUSHQ %%r15\n");
 
-    stmt_codegen(code, f->name);
+    func_body_codegen(func_decl->symbol->name, func_decl->value.cfg_node);
 
-    printf(".%s_epilogue:\n");
+    printf("%s_epilogue:\n");
 
     printf("POPQ %%r15\n");
     printf("POPQ %%r14\n");
@@ -148,6 +245,41 @@ void func_codegen(symbol* f, stmt* code) {
     printf("MOVQ %%rbp, %%rsp\n");
     printf("POPQ %%rbp\n");
     printf("RET\n");
+}
+
+void func_body_codegen(const char* func_name, cfg_node* node) {
+    if (!node) return;
+    switch (node->kind) {
+        case CFG_BLOCK:
+            stmt_codegen(
+                node->value.block->stmt,
+                func_name
+            );
+            func_body_codegen(func_name, node->value.block->next);
+            break;
+        case CFG_BRANCH:
+            expr_codegen(node->value.branch->condition);
+            printf(
+                "CMP %s, $0\n",
+                scratch_name(node->value.branch->condition->reg)
+            );
+            scratch_free(node->value.branch->condition->reg);
+            int true_label = create_label();
+            printf(
+                "JNE %s\n",
+                label_name(true_label)
+            );
+            func_body_codegen(func_name, node->value.branch->false_branch);
+            printf("%s:\n", label_name(true_label));
+            func_body_codegen(func_name, node->value.branch->true_branch);
+            break;
+        case CFG_RETURN:
+            printf(
+                "JMP %s_epilogue\n",
+                func_name
+            );
+            break;
+    }
 }
 
 void stmt_codegen(stmt* s, const char* func_name) {
@@ -199,10 +331,6 @@ void stmt_codegen(stmt* s, const char* func_name) {
                 scratch_name(s->expr->reg)
             );
             scratch_free(s->expr->reg);
-            printf(
-                "JMP .%s_epilogue\n",
-                func_name
-            );
             break;
         default:
             fprintf(
@@ -286,7 +414,7 @@ void expr_codegen(expr* e) {
             );
             printf( /* increment value */
                 "INCQ %s\n",
-                scratch_name(e->left->symbol)
+                scratch_name(e->reg)
             );
             printf( /* copy new value back to variable */
                 "MOVQ %s, %s\n",
@@ -303,7 +431,7 @@ void expr_codegen(expr* e) {
             );
             printf( /* decrement value */
                 "DECQ %s\n",
-                scratch_name(e->left->symbol)
+                scratch_name(e->reg)
             );
             printf( /* copy new value back to variable */
                 "MOVQ %s, %s\n",
@@ -421,6 +549,56 @@ void expr_codegen(expr* e) {
                 "MOVQ %%rax, %s\n",
                 scratch_name(e->reg)
             );
+            break;
+        case EXPR_ARRAY:
+            printf(
+                "MOVQ $%s, %%rax\n",
+                e->symbol->type->size
+            );
+            printf(
+                "IMULQ $8\n"
+            );
+            e->reg = scratch_alloc();
+            printf( /* save soon-to-be array address to register */
+                "MOVQ %%rsp, %s\n",
+                scratch_name(e->reg)
+            );
+            printf(
+                "SUBQ %%rax, %%rsp\n"
+            );
+            int pointer = scratch_alloc();
+            printf(
+                "MOVQ %s, %s\n",
+                scratch_name(e->reg),
+                scratch_name(pointer)
+            );
+            expr* item = e;
+            while (item != NULL) {
+                printf(
+                    "MOVQ $%d, (%s)\n",
+                    e->value,
+                    scratch_name(pointer)
+                );
+                printf(
+                    "SUBQ $4, %s\n",
+                    scratch_name(pointer)
+                );
+                item = item->right;
+            }
+            scratch_free(pointer);
+            break;
+        case EXPR_INDEX:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            e->reg = scratch_alloc();
+            printf(
+                "MOVQ (%s, %s, $8), %s\n",
+                scratch_name(e->left->reg),
+                scratch_name(e->right->reg),
+                scratch_name(e->reg)
+            );
+            scratch_free(e->left->reg);
+            scratch_free(e->right->reg);
             break;
     }
 }

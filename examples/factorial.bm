@@ -1,7 +1,3 @@
-/* using a tail-recursive version of factorial here... if I or anyone
- * else returns to this compiler later, testing a tail-call optimization 
- * would be a good exercise. */
-
 fact_helper: function integer ( n: integer, f: integer ) = {
     if (n == 1 || n == 0) {
         return f;

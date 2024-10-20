@@ -3,25 +3,27 @@
 type* type_create(
     type_t kind,
     type* subtype,
-    param_list* params
+    param_list* params,
+    int size
 ) {
     type* t = malloc(sizeof(*t));
     t->kind = kind;
     t->subtype = subtype;
     t->params = params;
+    t->size;
     return t;
 }
 
 type* type_data(type_t kind) {
-    return type_create(kind, 0, 0);
+    return type_create(kind, 0, 0, 0);
 }
 
-type* type_array(type* subtype) {
-    return type_create(TYPE_ARRAY, subtype, 0);
+type* type_array(type* subtype, int size) {
+    return type_create(TYPE_ARRAY, subtype, 0, size);
 }
 
 type* type_function(type* subtype, param_list* params) {
-    return type_create(TYPE_FUNCTION, subtype, params);
+    return type_create(TYPE_FUNCTION, subtype, params, 0);
 }
 
 void print_type(type* type, int tab_level) {

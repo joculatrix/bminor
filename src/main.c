@@ -1,4 +1,7 @@
 #include "ast.h"
+#include "constant_fold.h"
+#include "cfg.h"
+#include "codegen.h"
 #include <stdio.h>
 
 extern FILE *yyin;
@@ -16,7 +19,7 @@ enum {ARG_NAME,ARG_FILE,ARG_NARGS};
 int main(int argc, char** argv) {
     /* verify number of arguments is correct */
     if (argc != ARG_NARGS) {
-        fprintf(stderr, "Usage: scanner filename\n");
+        fprintf(stderr, "Usage: bmcc filename\n");
         return 1;
     }
     /* open file to parse */
@@ -36,6 +39,15 @@ int main(int argc, char** argv) {
 
         /* type check */
         decl_typecheck(parser_result);
+
+        /* constant fold */
+        constant_fold_decl(parser_result);
+
+        /* convert to CFG */
+        cfg* cfg = cfg_construct(parser_result);
+
+        /* codegen */
+        codegen(cfg);
     } else {
         printf("Parse failed.\n");
     }

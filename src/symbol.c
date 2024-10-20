@@ -109,6 +109,10 @@ void decl_resolve(decl* d) {
         d->symbol = symbol_create(kind, d->type, d->name);
 
         expr_resolve(d->value);
+
+        if (d->type == TYPE_ARRAY) {
+            d->value->symbol = d->symbol;
+        }
         
         if (d->code) {
             if (d->name == "main") {

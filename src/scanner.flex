@@ -15,6 +15,8 @@ int str_len_check(int);
 
 %}
 
+%option yylineno
+
 %x COMMENT
 %x STR
 
