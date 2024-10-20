@@ -4,6 +4,9 @@
  * This header defines types, global values, and functions for generating
  * the program executable. Currently this process works off the control-
  * flow graph and generates x86_64 Assembly.
+ * 
+ * Implementation of this header is separated into `codegen/codegen.c`,
+ * `codegen/print.c`, and `codegen/utility.c`
  */
 #ifndef CODEGEN_H
 #define CODEGEN_H
@@ -78,7 +81,7 @@ void decl_codegen(decl* d);
 
 void func_codegen(symbol* f, stmt* code);
 
-void stmt_codegen(stmt* s);
+void stmt_codegen(stmt* s, const char* func_name);
 void expr_codegen(expr* e);
 
 /* print: */
