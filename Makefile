@@ -32,4 +32,4 @@ debug: CFLAGS += -g
 debug: bmcc
 
 debug-parser: BISONFLAGS += -v -Wcounterexamples
-debug-parser: parser.yy.c
+debug-parser: parser
